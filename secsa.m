@@ -94,5 +94,23 @@ arrows = repmat(' --[should gift a present to]--> ', n_presents, 1);
 % row-first, transpose the matrix
 i_takers = mod(find(chosen_possibility') - 1, n_presents) + 1;
 takers = names(i_takers, :);
+LF_CHAR = char(10); % ASCII '\n'
+newlines = repmat(LF_CHAR, n_presents, 1);
 
-disp([givers, arrows, takers]);
+cleartext = [givers, arrows, takers, newlines];
+
+%% "encrypt" (binary representation of ASCII) output string
+
+% dec2bin scans matrices column-first, we need row-first
+ciphertext = dec2base(cleartext' + 0, 2, 8);
+% add some text @ begin and end to avoid accidental read + decoding binary ASCII
+txt_prepend = repmat(dec2base(["/--", LF_CHAR] + 0, 2, 8), randi(10), 1);
+txt_append = repmat(dec2base(["--/", LF_CHAR] + 0, 2, 8), randi(10), 1);
+ciphertext = [txt_prepend; ciphertext; txt_append];
+ciphertext_horiz = reshape(ciphertext', 1, 8 * size(ciphertext)(1));
+
+%% output
+
+disp("Send this to your trusted secret-santa relayer:");
+disp("(Tell him/her to use a binary to ASCII converter to see who's the secret santa of who)");
+disp(ciphertext_horiz);
